@@ -26,9 +26,9 @@ where
     type Item = &'string str;
     fn next(&mut self) -> Option<Self::Item> {
         let remainder = self.remainder.as_mut()?;
-        if let Some((delim_start, delim_end)) = self.divider.find_next(remainder) {
-            let until_divider = &remainder[..delim_start];
-            *remainder = &remainder[delim_end..];
+        if let Some((divider_start, divider_end)) = self.divider.find_next(remainder) {
+            let until_divider = &remainder[..divider_start];
+            *remainder = &remainder[divider_end..];
             Some(until_divider)
         } else {
             self.remainder.take()
@@ -48,30 +48,4 @@ impl Divider for char {
             .find(|(_, c)| c == self)
             .map(|(start, _)| (start, start + self.len_utf8()))
     }
-}
-
-pub fn until_char(s: &str, c: char) -> &str {
-    let divider = format!("{}", c);
-    StrSplit::new(s, &*divider)
-        .next()
-        .expect("StrSplit always gives at least one result")
-}
-
-#[test]
-fn it_works() {
-    let string = "a f d h h j j";
-    let letters: Vec<_> = StrSplit::new(string, " ").collect();
-    assert_eq!(letters, vec!["a", "f", "d", "h", "h", "j", "j"]);
-}
-
-#[test]
-fn tail() {
-    let string = "a f d h h j ";
-    let letters: Vec<_> = StrSplit::new(string, " ").collect();
-    assert_eq!(letters, vec!["a", "f", "d", "h", "h", "j", ""]);
-}
-
-#[test]
-fn until_char_test() {
-    assert_eq!(until_char("Until char", 't'), "Un");
 }
